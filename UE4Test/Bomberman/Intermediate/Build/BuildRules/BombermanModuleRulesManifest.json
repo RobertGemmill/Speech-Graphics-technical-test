@@ -1,0 +1,8 @@
+{
+	"SourceFiles": [
+		"E:\\Unreal\\Speech-Graphics-technical-test\\UE4Test\\Bomberman\\Source\\Bomberman\\Bomberman.Build.cs",
+		"E:\\Unreal\\Speech-Graphics-technical-test\\UE4Test\\Bomberman\\Source\\Bomberman.Target.cs",
+		"E:\\Unreal\\Speech-Graphics-technical-test\\UE4Test\\Bomberman\\Source\\BombermanEditor.Target.cs"
+	],
+	"EngineVersion": "4.26.2"
+}

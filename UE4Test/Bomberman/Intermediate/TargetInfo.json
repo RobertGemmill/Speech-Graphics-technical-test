@@ -1,0 +1,14 @@
+{
+	"Targets": [
+		{
+			"Name": "Bomberman",
+			"Path": "E:\\Unreal\\Speech-Graphics-technical-test\\UE4Test\\Bomberman\\Source\\Bomberman.Target.cs",
+			"Type": "Game"
+		},
+		{
+			"Name": "BombermanEditor",
+			"Path": "E:\\Unreal\\Speech-Graphics-technical-test\\UE4Test\\Bomberman\\Source\\BombermanEditor.Target.cs",
+			"Type": "Editor"
+		}
+	]
+}
