@@ -1,2 +1,0 @@
-E:\Unreal\Speech-Graphics-technical-test\UE4Test\Bomberman\Intermediate\Build\Win64\UE4Editor\Development\Bomberman\Definitions.Bomberman.h
-E:\Unreal\Speech-Graphics-technical-test\UE4Test\Bomberman\Source\Bomberman\Bomberman.h
