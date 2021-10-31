@@ -22,6 +22,7 @@ void APlayerPawn::BeginPlay()
 
 void APlayerPawn::Player1DropBomb()
 {
+
 	Player1->DropBomb();
 }
 

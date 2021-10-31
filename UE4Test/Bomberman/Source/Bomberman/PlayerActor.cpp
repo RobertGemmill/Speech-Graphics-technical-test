@@ -2,52 +2,115 @@
 
 
 #include "PlayerActor.h"
+#include "BombActor.h"
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
 APlayerActor::APlayerActor()
 {
-	PlayerSpeed = 1000.0f;
+	PlayerSpeed = 5000000.0f;
 	PlayerMaxSpeed = 10.0f;
+	GridStepSize = 150.0f;
+	FirstGridPoint = FVector(675.0f, -675.0f, 0.0f);
+	LastGridPoint = FVector(-675.0f, 675.0f, 0.0f);
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerBody"));
 	Body->SetupAttachment(RootComponent);
 	Head = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerHead"));
 	Head->SetupAttachment(Body);
 
-	
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 }
 
 void APlayerActor::DropBomb()
 {
+	Test();
+	
+	FVector BombLocation = GetNearestGridPoint();
+	GetWorld()->SpawnActor<ABombActor>(BombClass, BombLocation, Body->GetComponentRotation());
+}
+
+void APlayerActor::Test()
+{
+	PlayerSpeed += 100000.0f;
 }
 
 void APlayerActor::MoveForward(float value)
 {
-	PlayerVelociy.X = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;
-	if (value == 0.0f)
-	{
-		Body->SetAllPhysicsLinearVelocity(FVector(0.0f, Body->GetPhysicsLinearVelocity().Y, Body->GetPhysicsLinearVelocity().Z));
-		Head->SetAllPhysicsLinearVelocity(FVector(0.0f, Head->GetPhysicsLinearVelocity().Y, Head->GetPhysicsLinearVelocity().Z));
-	}
+	Body->SetAllPhysicsLinearVelocity(FVector(0.0f, Body->GetPhysicsLinearVelocity().Y, Body->GetPhysicsLinearVelocity().Z));
+	Head->SetAllPhysicsLinearVelocity(FVector(0.0f, Head->GetPhysicsLinearVelocity().Y, Head->GetPhysicsLinearVelocity().Z));
+
+	PlayerVelociy.X = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;	
 }
 
 void APlayerActor::MoveRight(float value)
 {
+	Body->SetAllPhysicsLinearVelocity(FVector(Body->GetPhysicsLinearVelocity().X, 0.0f, Body->GetPhysicsLinearVelocity().Z));
+	Head->SetAllPhysicsLinearVelocity(FVector(Head->GetPhysicsLinearVelocity().X, 0.0f, Head->GetPhysicsLinearVelocity().Z));
+
 	PlayerVelociy.Y = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;
-	if (value == 0.0f)
-	{
-		Body->SetAllPhysicsLinearVelocity(FVector(Body->GetPhysicsLinearVelocity().X, 0.0f, Body->GetPhysicsLinearVelocity().Z));
-		Head->SetAllPhysicsLinearVelocity(FVector(Head->GetPhysicsLinearVelocity().X, 0.0f, Head->GetPhysicsLinearVelocity().Z));
-	}
 }
 
 // Called when the game starts or when spawned
 void APlayerActor::BeginPlay()
 {
 	Super::BeginPlay();
+	
+}
+
+FVector APlayerActor::GetNearestGridPoint()
+{
+	FVector PlayerLocation = Body->GetComponentLocation();
+	float PX = PlayerLocation.X;
+	float PY = PlayerLocation.Y;
+	float GridPointX = 75.0f;
+	float GridPointY = 75.0f;
+
+	return FVector(LoopThroughPoints(PX,GridPointX,GridStepSize), LoopThroughPoints(PY, GridPointY, GridStepSize), PlayerLocation.Z);
+}
+
+float APlayerActor::LoopThroughPoints(float PointOnGrid, float ClosestPoint, float Step)
+{
+	for (int i = 0; i < 10; i++)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("i: %i"), i));
+		if (PointOnGrid < ClosestPoint)
+		{
+			if (PointOnGrid < (ClosestPoint - Step))
+			{
+				ClosestPoint -= Step;
+				continue;
+			}
+			else if (PointOnGrid > ClosestPoint - Step)
+			{
+				if (PointOnGrid < (ClosestPoint - (Step / 2.0f)))
+				{
+					ClosestPoint -= Step;
+					break;
+				}
+				break;
+			}
+		}
+		else if (PointOnGrid > ClosestPoint)
+		{
+			if (PointOnGrid > (ClosestPoint + Step))
+			{
+				ClosestPoint += Step;
+				continue;
+			}
+			else if (PointOnGrid < ClosestPoint + Step)
+			{
+				if (PointOnGrid > (ClosestPoint + (Step / 2.0f)))
+				{
+					ClosestPoint += Step;
+					break;
+				}
+				break;
+			}
+		}
+	}
+	return ClosestPoint;
 	
 }
 
@@ -59,11 +122,7 @@ void APlayerActor::Tick(float DeltaTime)
 	if (!PlayerVelociy.IsZero())
 	{
 		FVector PlayerNewLocation = Body->ComponentVelocity + (PlayerVelociy * DeltaTime);
-		if ((Body->GetPhysicsLinearVelocity() + PlayerNewLocation).Size() < PlayerMaxSpeed)
-		{
-			Body->AddImpulse(PlayerNewLocation);
-		}
-	
+		Body->AddImpulse(PlayerNewLocation);
 	}
 	else
 	{
