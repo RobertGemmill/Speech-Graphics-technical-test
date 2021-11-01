@@ -34,6 +34,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	void decrementSpawnedBombs();
 	
 
 public:
@@ -64,6 +66,11 @@ public:
 
 private:
 
+	int MaxBombs;
+	int SpawnedBombs;
+
 	FVector PlayerVelociy;
+
+	ABombActor* LastBombRef;
 
 };

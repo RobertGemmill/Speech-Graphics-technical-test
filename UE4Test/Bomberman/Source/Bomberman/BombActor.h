@@ -6,7 +6,10 @@
 #include "GameFramework/Actor.h"
 #include "BombActor.generated.h"
 
+class APlayerActor;
 class UStaticMeshComponent;
+
+
 
 UCLASS()
 class BOMBERMAN_API ABombActor : public AActor
@@ -17,17 +20,19 @@ public:
 	// Sets default values for this actor's properties
 	ABombActor();
 
+	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	
+	UFUNCTION()
+	void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
 	void OnExplode();
 
-	UFUNCTION()
-	void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void LineTraceCheck(FVector Start, FVector End);
 
 public:	
 	// Called every frame
@@ -47,5 +52,7 @@ public:
 	int ExplosionPenetration;
 
 	FTimerHandle FuzeTimerHandle;
+
+	APlayerActor* PlayerRef;
 
 };

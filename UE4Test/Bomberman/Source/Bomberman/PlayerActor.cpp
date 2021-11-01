@@ -8,6 +8,8 @@
 // Sets default values
 APlayerActor::APlayerActor()
 {
+	MaxBombs = 1;
+	SpawnedBombs = 0;
 	PlayerSpeed = 5000000.0f;
 	PlayerMaxSpeed = 10.0f;
 	GridStepSize = 150.0f;
@@ -25,10 +27,27 @@ APlayerActor::APlayerActor()
 
 void APlayerActor::DropBomb()
 {
-	Test();
-	
-	FVector BombLocation = GetNearestGridPoint();
-	GetWorld()->SpawnActor<ABombActor>(BombClass, BombLocation, Body->GetComponentRotation());
+	if(SpawnedBombs < MaxBombs)
+	{
+		TArray<AActor*> Result;
+		GetOverlappingActors(Result, ABombActor::StaticClass());
+		if (Result.Num() == 0)
+		{
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("BombPlaced")));
+			FVector BombLocation = GetNearestGridPoint();
+			LastBombRef = GetWorld()->SpawnActor<ABombActor>(BombClass, BombLocation, Body->GetComponentRotation());
+			LastBombRef->PlayerRef = this;
+			SpawnedBombs++;
+		}
+	}
+}
+
+void APlayerActor::decrementSpawnedBombs()
+{
+	if (SpawnedBombs > 0)
+	{
+		SpawnedBombs--;
+	}
 }
 
 void APlayerActor::Test()
@@ -38,18 +57,18 @@ void APlayerActor::Test()
 
 void APlayerActor::MoveForward(float value)
 {
-	Body->SetAllPhysicsLinearVelocity(FVector(0.0f, Body->GetPhysicsLinearVelocity().Y, Body->GetPhysicsLinearVelocity().Z));
-	Head->SetAllPhysicsLinearVelocity(FVector(0.0f, Head->GetPhysicsLinearVelocity().Y, Head->GetPhysicsLinearVelocity().Z));
-
-	PlayerVelociy.X = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;	
-}
-
-void APlayerActor::MoveRight(float value)
-{
 	Body->SetAllPhysicsLinearVelocity(FVector(Body->GetPhysicsLinearVelocity().X, 0.0f, Body->GetPhysicsLinearVelocity().Z));
 	Head->SetAllPhysicsLinearVelocity(FVector(Head->GetPhysicsLinearVelocity().X, 0.0f, Head->GetPhysicsLinearVelocity().Z));
 
 	PlayerVelociy.Y = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;
+}
+
+void APlayerActor::MoveRight(float value)
+{
+	Body->SetAllPhysicsLinearVelocity(FVector(0.0f, Body->GetPhysicsLinearVelocity().Y, Body->GetPhysicsLinearVelocity().Z));
+	Head->SetAllPhysicsLinearVelocity(FVector(0.0f, Head->GetPhysicsLinearVelocity().Y, Head->GetPhysicsLinearVelocity().Z));
+
+	PlayerVelociy.X = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;
 }
 
 // Called when the game starts or when spawned
@@ -74,7 +93,7 @@ float APlayerActor::LoopThroughPoints(float PointOnGrid, float ClosestPoint, flo
 {
 	for (int i = 0; i < 10; i++)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("i: %i"), i));
+		
 		if (PointOnGrid < ClosestPoint)
 		{
 			if (PointOnGrid < (ClosestPoint - Step))
