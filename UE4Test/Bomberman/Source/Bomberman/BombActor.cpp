@@ -3,6 +3,7 @@
 #include "BombActor.h"
 #include "PlayerActor.h"
 #include "DrawDebugHelpers.h"
+#include "Interfaces/ExplosionInterface.h"
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
@@ -22,6 +23,7 @@ ABombActor::ABombActor()
 
 void ABombActor::OnExplode()
 {
+	Mesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
 	LineTraceCheck(FVector(GetActorLocation().X + (75.0f), GetActorLocation().Y, GetActorLocation().Z),
 		FVector(GetActorLocation().X + (150.0f * ExplosionRange), GetActorLocation().Y, GetActorLocation().Z));
 
@@ -53,23 +55,37 @@ void ABombActor::LineTraceCheck(FVector Start, FVector End)
 		
 		for (int i = 0; i < OutHit.Num(); i++)
 		{
-			if (OutHit[i].Actor != this)
+			if (OutHit[i].Actor != nullptr)
 			{
-				if (!OutHit[i].bBlockingHit)
+				if (OutHit[i].Actor != this)
 				{
-					if (GEngine) {
-						GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Purple, FString::Printf(TEXT("You are hitting: %s"), *OutHit[i].GetActor()->GetName()));
+					if (!OutHit[i].bBlockingHit)
+					{
+						if (GEngine) {
+							GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Purple, FString::Printf(TEXT("You are hitting: %s"), *OutHit[i].GetActor()->GetName()));
+							if (OutHit[i].Actor->GetClass()->ImplementsInterface(UExplosionInterface::StaticClass()))
+							{
+								Cast<IExplosionInterface>(OutHit[i].Actor)->ExplosionResponce();
+							}
+						}
 					}
 				}
 			}
 		}
 
-		if (OutHit.Last().bBlockingHit)
+		if (OutHit.Last().Actor != nullptr)
 		{
-			if (GEngine) {
-				GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("You are hitting: %s"), *OutHit.Last().GetActor()->GetName()));
-			}
+			if (OutHit.Last().bBlockingHit)
+			{
+				if (GEngine) {
+					GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Red, FString::Printf(TEXT("You are hitting: %s"), *OutHit.Last().GetActor()->GetName()));
+					if (OutHit.Last().GetActor()->GetClass()->ImplementsInterface(UExplosionInterface::StaticClass()))
+					{
+						Cast<IExplosionInterface>(OutHit.Last().GetActor())->ExplosionResponce();
+					}
+				}
 
+			}
 		}
 		
 	}
@@ -96,5 +112,10 @@ void ABombActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+}
+
+void ABombActor::ExplosionResponce()
+{
+	OnExplode();
 }
 

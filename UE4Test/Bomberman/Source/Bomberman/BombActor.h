@@ -4,15 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Interfaces/ExplosionInterface.h"
 #include "BombActor.generated.h"
 
 class APlayerActor;
+class IExplosionInterface;
 class UStaticMeshComponent;
 
 
 
 UCLASS()
-class BOMBERMAN_API ABombActor : public AActor
+class BOMBERMAN_API ABombActor : public AActor, public IExplosionInterface
 {
 	GENERATED_BODY()
 	
@@ -37,6 +39,8 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	virtual void ExplosionResponce() override;
 
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* Mesh;
