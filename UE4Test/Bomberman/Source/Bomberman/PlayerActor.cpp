@@ -8,8 +8,11 @@
 // Sets default values
 APlayerActor::APlayerActor()
 {
+	bHoldingDetonator = false;
+	bRemoteBombSpawned = false;
 	MaxBombs = 1;
 	SpawnedBombs = 0;
+	PlayerBombRange = 3.0f;
 	PlayerSpeed = 5000000.0f;
 	PlayerMaxSpeed = 10.0f;
 	GridStepSize = 150.0f;
@@ -27,16 +30,35 @@ APlayerActor::APlayerActor()
 
 void APlayerActor::DropBomb()
 {
-	if(SpawnedBombs < MaxBombs)
+	if (bRemoteBombSpawned)
+	{
+		RemoteBombRef->OnExplode();
+		bRemoteBombSpawned = false;
+		bHoldingDetonator = false;
+	}
+	else if (SpawnedBombs < MaxBombs)
 	{
 		TArray<AActor*> Result;
 		GetOverlappingActors(Result, ABombActor::StaticClass());
+			
 		if (Result.Num() == 0)
 		{
 			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("BombPlaced")));
 			FVector BombLocation = GetNearestGridPoint();
-			LastBombRef = GetWorld()->SpawnActor<ABombActor>(BombClass, BombLocation, Body->GetComponentRotation());
-			LastBombRef->PlayerRef = this;
+
+			if (!bHoldingDetonator)
+			{
+				LastBombRef = GetWorld()->SpawnActor<ABombActor>(BombClass, BombLocation, Body->GetComponentRotation());
+				LastBombRef->PlayerRef = this;
+				LastBombRef->SetDefaultParameters(PlayerBombRange);
+			}
+			else if (bHoldingDetonator)
+			{
+				RemoteBombRef = GetWorld()->SpawnActor<ABombActor>(RemoteBombClass, BombLocation, Body->GetComponentRotation());
+				RemoteBombRef->PlayerRef = this;
+				RemoteBombRef->SetDefaultParameters(PlayerBombRange);
+				bRemoteBombSpawned = true;
+			}
 			SpawnedBombs++;
 		}
 	}
@@ -48,6 +70,26 @@ void APlayerActor::decrementSpawnedBombs()
 	{
 		SpawnedBombs--;
 	}
+}
+
+void APlayerActor::IncrementMaxBombs()
+{
+	MaxBombs++;
+}
+
+void APlayerActor::PowerUpDetonator()
+{
+	bHoldingDetonator = true;
+}
+
+void APlayerActor::PowerUpBombRange()
+{
+	PlayerBombRange = 5.0f;
+}
+
+void APlayerActor::PowerUpSpeed()
+{
+	PlayerSpeed = 7500000.0f;
 }
 
 void APlayerActor::Test()
@@ -75,7 +117,6 @@ void APlayerActor::MoveRight(float value)
 void APlayerActor::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 FVector APlayerActor::GetNearestGridPoint()

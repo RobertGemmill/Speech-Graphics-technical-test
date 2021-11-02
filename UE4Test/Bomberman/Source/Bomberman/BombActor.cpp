@@ -3,6 +3,7 @@
 #include "BombActor.h"
 #include "PlayerActor.h"
 #include "DrawDebugHelpers.h"
+#include "Components/BoxComponent.h"
 #include "Interfaces/ExplosionInterface.h"
 #include "Components/StaticMeshComponent.h"
 
@@ -16,14 +17,20 @@ ABombActor::ABombActor()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("BombMesh"));
 	Mesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Overlap);
 	Mesh->SetGenerateOverlapEvents(true);
+
+	BoxOverlap = CreateDefaultSubobject<UBoxComponent >(TEXT("BombOverlap"));
+	BoxOverlap->SetupAttachment(Mesh);
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 }
 
+
 void ABombActor::OnExplode()
 {
 	Mesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+	BoxOverlap->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Ignore);
+
 	LineTraceCheck(FVector(GetActorLocation().X + (75.0f), GetActorLocation().Y, GetActorLocation().Z),
 		FVector(GetActorLocation().X + (150.0f * ExplosionRange), GetActorLocation().Y, GetActorLocation().Z));
 
@@ -95,6 +102,11 @@ void ABombActor::OnComponentEndOverlap(UPrimitiveComponent* OverlappedComp, AAct
 {
 	Mesh->SetCollisionResponseToAllChannels(ECollisionResponse::ECR_Block);
 	Mesh->SetGenerateOverlapEvents(false);
+}
+
+void ABombActor::SetDefaultParameters(float Range)
+{
+	ExplosionRange = Range;
 }
 
 // Called when the game starts or when spawned

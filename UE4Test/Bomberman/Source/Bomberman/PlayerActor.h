@@ -36,8 +36,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void decrementSpawnedBombs();
+	void IncrementMaxBombs();
+	void PowerUpDetonator();
+	void PowerUpBombRange();
+	void PowerUpSpeed();
 	
-
 public:
 
 	UPROPERTY(EditDefaultsOnly)
@@ -49,11 +52,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Bomb)
 		TSubclassOf<class ABombActor> BombClass;
 
+	UPROPERTY(EditDefaultsOnly, Category = Bomb)
+		TSubclassOf<class ABombActor> RemoteBombClass;
+
 	UPROPERTY(EditAnywhere, Category = "Player Speed")
 		float PlayerSpeed;
+
 	UPROPERTY(EditAnywhere, Category = "Player Speed")
 		float PlayerMaxSpeed;
-
 
 	UPROPERTY(EditAnywhere, Category = "Grid")
 		float GridStepSize;
@@ -66,11 +72,16 @@ public:
 
 private:
 
+	bool bHoldingDetonator;
+	bool bRemoteBombSpawned;
+
+	float PlayerBombRange;
+
 	int MaxBombs;
 	int SpawnedBombs;
 
 	FVector PlayerVelociy;
-
 	ABombActor* LastBombRef;
+	ABombActor* RemoteBombRef;
 
 };

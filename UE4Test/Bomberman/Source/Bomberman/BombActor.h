@@ -10,6 +10,7 @@
 class APlayerActor;
 class IExplosionInterface;
 class UStaticMeshComponent;
+class UBoxComponent;
 
 
 
@@ -22,7 +23,7 @@ public:
 	// Sets default values for this actor's properties
 	ABombActor();
 
-	
+	void SetDefaultParameters(float Range);
 
 protected:
 	// Called when the game starts or when spawned
@@ -30,9 +31,6 @@ protected:
 
 	UFUNCTION()
 	void OnComponentEndOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
-
-	UFUNCTION()
-	void OnExplode();
 
 	void LineTraceCheck(FVector Start, FVector End);
 
@@ -42,9 +40,14 @@ public:
 
 	virtual void ExplosionResponce() override;
 
+	UFUNCTION()
+	void OnExplode();
+
 	UPROPERTY(EditDefaultsOnly)
 	UStaticMeshComponent* Mesh;
 
+	UPROPERTY(EditDefaultsOnly)
+	UBoxComponent* BoxOverlap;
 
 	UPROPERTY(EditAnywhere, Category = "Bomb")
 	float FuzeTime;
