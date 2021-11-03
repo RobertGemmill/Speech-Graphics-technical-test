@@ -13,5 +13,10 @@ UCLASS()
 class BOMBERMAN_API ABombermanGameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
+
+	public: 
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "GameOver")
+	bool bGameOver;
 	
 };

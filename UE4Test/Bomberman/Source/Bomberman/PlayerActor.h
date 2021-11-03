@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Bomberman/Interfaces/ExplosionInterface.h"
 #include "PlayerActor.generated.h"
 
 class ABombActor;
 class UStaticMeshComponent;
+class IExplosionInterface;
 
 UCLASS()
-class BOMBERMAN_API APlayerActor : public AActor
+class BOMBERMAN_API APlayerActor : public AActor, public IExplosionInterface
 {
 	GENERATED_BODY()
 	
@@ -35,6 +37,8 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	virtual void ExplosionResponce() override;
+
 	void decrementSpawnedBombs();
 	void IncrementMaxBombs();
 	void PowerUpDetonator();
@@ -54,6 +58,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = Bomb)
 		TSubclassOf<class ABombActor> RemoteBombClass;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "PlayerID")
+		int32 PlayerNumber;
 
 	UPROPERTY(EditAnywhere, Category = "Player Speed")
 		float PlayerSpeed;
@@ -77,8 +84,8 @@ private:
 
 	float PlayerBombRange;
 
-	int MaxBombs;
-	int SpawnedBombs;
+	int32 MaxBombs;
+	int32 SpawnedBombs;
 
 	FVector PlayerVelociy;
 	ABombActor* LastBombRef;

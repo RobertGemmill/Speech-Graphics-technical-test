@@ -3,6 +3,9 @@
 
 #include "PlayerActor.h"
 #include "BombActor.h"
+#include "Interfaces/ExplosionInterface.h"
+#include "GameInstances/BombermanGameInstance.h"
+#include "BombermanGameModeBase.h"
 #include "Components/StaticMeshComponent.h"
 
 // Sets default values
@@ -30,36 +33,39 @@ APlayerActor::APlayerActor()
 
 void APlayerActor::DropBomb()
 {
-	if (bRemoteBombSpawned)
+	if (this != nullptr)
 	{
-		RemoteBombRef->OnExplode();
-		bRemoteBombSpawned = false;
-		bHoldingDetonator = false;
-	}
-	else if (SpawnedBombs < MaxBombs)
-	{
-		TArray<AActor*> Result;
-		GetOverlappingActors(Result, ABombActor::StaticClass());
-			
-		if (Result.Num() == 0)
+		if (bRemoteBombSpawned)
 		{
-			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("BombPlaced")));
-			FVector BombLocation = GetNearestGridPoint();
+			RemoteBombRef->OnExplode();
+			bRemoteBombSpawned = false;
+			bHoldingDetonator = false;
+		}
+		else if (SpawnedBombs < MaxBombs)
+		{
+			TArray<AActor*> Result;
+			GetOverlappingActors(Result, ABombActor::StaticClass());
 
-			if (!bHoldingDetonator)
+			if (Result.Num() == 0)
 			{
-				LastBombRef = GetWorld()->SpawnActor<ABombActor>(BombClass, BombLocation, Body->GetComponentRotation());
-				LastBombRef->PlayerRef = this;
-				LastBombRef->SetDefaultParameters(PlayerBombRange);
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("BombPlaced")));
+				FVector BombLocation = GetNearestGridPoint();
+
+				if (!bHoldingDetonator)
+				{
+					LastBombRef = GetWorld()->SpawnActor<ABombActor>(BombClass, BombLocation, Body->GetComponentRotation());
+					LastBombRef->PlayerRef = this;
+					LastBombRef->SetDefaultParameters(PlayerBombRange);
+				}
+				else if (bHoldingDetonator)
+				{
+					RemoteBombRef = GetWorld()->SpawnActor<ABombActor>(RemoteBombClass, BombLocation, Body->GetComponentRotation());
+					RemoteBombRef->PlayerRef = this;
+					RemoteBombRef->SetDefaultParameters(PlayerBombRange);
+					bRemoteBombSpawned = true;
+				}
+				SpawnedBombs++;
 			}
-			else if (bHoldingDetonator)
-			{
-				RemoteBombRef = GetWorld()->SpawnActor<ABombActor>(RemoteBombClass, BombLocation, Body->GetComponentRotation());
-				RemoteBombRef->PlayerRef = this;
-				RemoteBombRef->SetDefaultParameters(PlayerBombRange);
-				bRemoteBombSpawned = true;
-			}
-			SpawnedBombs++;
 		}
 	}
 }
@@ -99,18 +105,24 @@ void APlayerActor::Test()
 
 void APlayerActor::MoveForward(float value)
 {
-	Body->SetAllPhysicsLinearVelocity(FVector(Body->GetPhysicsLinearVelocity().X, 0.0f, Body->GetPhysicsLinearVelocity().Z));
-	Head->SetAllPhysicsLinearVelocity(FVector(Head->GetPhysicsLinearVelocity().X, 0.0f, Head->GetPhysicsLinearVelocity().Z));
+	if (this != nullptr)
+	{
+		Body->SetAllPhysicsLinearVelocity(FVector(Body->GetPhysicsLinearVelocity().X, 0.0f, Body->GetPhysicsLinearVelocity().Z));
+		Head->SetAllPhysicsLinearVelocity(FVector(Head->GetPhysicsLinearVelocity().X, 0.0f, Head->GetPhysicsLinearVelocity().Z));
 
-	PlayerVelociy.Y = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;
+		PlayerVelociy.Y = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;
+	}
 }
 
 void APlayerActor::MoveRight(float value)
 {
-	Body->SetAllPhysicsLinearVelocity(FVector(0.0f, Body->GetPhysicsLinearVelocity().Y, Body->GetPhysicsLinearVelocity().Z));
-	Head->SetAllPhysicsLinearVelocity(FVector(0.0f, Head->GetPhysicsLinearVelocity().Y, Head->GetPhysicsLinearVelocity().Z));
+	if (this != nullptr)
+	{
+		Body->SetAllPhysicsLinearVelocity(FVector(0.0f, Body->GetPhysicsLinearVelocity().Y, Body->GetPhysicsLinearVelocity().Z));
+		Head->SetAllPhysicsLinearVelocity(FVector(0.0f, Head->GetPhysicsLinearVelocity().Y, Head->GetPhysicsLinearVelocity().Z));
 
-	PlayerVelociy.X = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;
+		PlayerVelociy.X = FMath::Clamp(value, -1.0f, 1.0f) * PlayerSpeed;
+	}
 }
 
 // Called when the game starts or when spawned
@@ -179,16 +191,27 @@ void APlayerActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	if (!PlayerVelociy.IsZero())
+	if (this != nullptr)
 	{
-		FVector PlayerNewLocation = Body->ComponentVelocity + (PlayerVelociy * DeltaTime);
-		Body->AddImpulse(PlayerNewLocation);
+		if (!PlayerVelociy.IsZero())
+		{
+			FVector PlayerNewLocation = Body->ComponentVelocity + (PlayerVelociy * DeltaTime);
+			Body->AddImpulse(PlayerNewLocation);
+		}
+		else
+		{
+			Body->SetAllPhysicsLinearVelocity(FVector(0.0f, 0.0f, 0.0f));
+			Head->SetAllPhysicsLinearVelocity(FVector(0.0f, 0.0f, 0.0f));
+		}
 	}
-	else
-	{
-		Body->SetAllPhysicsLinearVelocity(FVector(0.0f, 0.0f, 0.0f));
-		Head->SetAllPhysicsLinearVelocity(FVector(0.0f, 0.0f, 0.0f));
-	}
+}
 
+void APlayerActor::ExplosionResponce()
+{
+	UBombermanGameInstance* GameInstanceRef = Cast<UBombermanGameInstance>(GetWorld()->GetGameInstance());
+	GameInstanceRef->PlayerScoreArray[2 - PlayerNumber]++;
+	ABombermanGameModeBase* GameModRef = Cast<ABombermanGameModeBase>(GetWorld()->GetAuthGameMode());
+	GameModRef->bGameOver = true;
+	Destroy();
 }
 

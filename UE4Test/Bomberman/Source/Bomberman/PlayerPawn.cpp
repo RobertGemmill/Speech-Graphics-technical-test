@@ -22,33 +22,50 @@ void APlayerPawn::BeginPlay()
 
 void APlayerPawn::Player1DropBomb()
 {
-
-	Player1->DropBomb();
+	if (Player1 != nullptr)
+	{
+		Player1->DropBomb();
+	}
 }
 
 void APlayerPawn::Player1MoveForward(float value)
 {
-	Player1->MoveForward(value);	
+	if (Player1 != nullptr)
+	{
+		Player1->MoveForward(value);
+	}
 }
 
 void APlayerPawn::Player1MoveRight(float value)
 {
-	Player1->MoveRight(value);
+	if (Player1 != nullptr)
+	{
+		Player1->MoveRight(value);
+	}
 }
 
 void APlayerPawn::Player2DropBomb()
 {
-	Player2->DropBomb();
+	if (Player2 != nullptr)
+	{
+		Player2->DropBomb();
+	}
 }
 
 void APlayerPawn::Player2MoveForward(float value)
 {
-	Player2->MoveForward(value);
+	if (Player2 != nullptr)
+	{
+		Player2->MoveForward(value);
+	}
 }
 
 void APlayerPawn::Player2MoveRight(float value)
 {
-	Player2->MoveRight(value);
+	if (Player2 != nullptr)
+	{
+		Player2->MoveRight(value);
+	}
 }
 
 
