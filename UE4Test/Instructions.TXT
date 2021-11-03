@@ -1,0 +1,15 @@
+*Controls*
+Player1:
+WASD to move,
+Space to Drop Bombs
+
+Player2:
+Arrow keys to move,
+Right Ctrl to Drop Bombs
+
+*PowerUps*
+
+Yellow Cube: Speed Powerup,
+Blue Cylanders: Extra Bomb,
+Red Sphere: Remote Bomb,
+Green Cone: Extra Bomb Range,

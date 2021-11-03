@@ -24,15 +24,17 @@ void ABaseCollectableActor::BeginPlay()
 }
 
 
+//When player overlaps collectabel apply powerup
 void ABaseCollectableActor::OnComponentBeginOverlap(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, 
 	int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
-	GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("You are hitting: %s"), *OtherActor->GetClass()->GetName()));
-	if (OtherActor->IsA(APlayerActor::StaticClass()))
+	if (OtherActor != nullptr)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Purple, FString::Printf(TEXT("You are hitting: %s"), *OtherActor->GetName()));
-		this->ApplyPowerUp(Cast<APlayerActor>(OtherActor));
-		Destroy();
+		if (OtherActor->IsA(APlayerActor::StaticClass()))
+		{
+			this->ApplyPowerUp(Cast<APlayerActor>(OtherActor));
+			Destroy();
+		}
 	}
 }
 

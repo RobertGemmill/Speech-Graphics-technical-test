@@ -5,5 +5,6 @@
 
 UBombermanGameInstance::UBombermanGameInstance()
 {
+	//Array to store Player Scores
 	PlayerScoreArray.Init(0, 2);
 }

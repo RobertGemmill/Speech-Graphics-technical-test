@@ -81,13 +81,13 @@ void APlayerPawn::SetupPlayerInputComponent(UInputComponent* PlayerInputComponen
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
+	//Bind Player 1 Inputs
 		InputComponent->BindAction("P1DropBomb", IE_Pressed, this, &APlayerPawn::Player1DropBomb);
 		InputComponent->BindAxis("P1MoveLeftRight", this, &APlayerPawn::Player1MoveForward);
 		InputComponent->BindAxis("P1MoveUpDown", this, &APlayerPawn::Player1MoveRight);
-	
+	//Bind Player 2 Inputs
 		InputComponent->BindAction("P2DropBomb", IE_Pressed, this, &APlayerPawn::Player2DropBomb);
 		InputComponent->BindAxis("P2MoveLeftRight", this, &APlayerPawn::Player2MoveForward);
 		InputComponent->BindAxis("P2MoveUpDown", this, &APlayerPawn::Player2MoveRight);
-	
 }
 

@@ -11,6 +11,7 @@
 // Sets default values
 APlayerActor::APlayerActor()
 {
+	//initialize base values
 	bHoldingDetonator = false;
 	bRemoteBombSpawned = false;
 	MaxBombs = 1;
@@ -21,6 +22,7 @@ APlayerActor::APlayerActor()
 	GridStepSize = 150.0f;
 	FirstGridPoint = FVector(675.0f, -675.0f, 0.0f);
 	LastGridPoint = FVector(-675.0f, 675.0f, 0.0f);
+
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 	Body = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("PlayerBody"));
 	Body->SetupAttachment(RootComponent);
@@ -31,32 +33,43 @@ APlayerActor::APlayerActor()
 	PrimaryActorTick.bCanEverTick = true;
 }
 
+// Called when the game starts or when spawned
+void APlayerActor::BeginPlay()
+{
+	Super::BeginPlay();
+}
+
 void APlayerActor::DropBomb()
 {
 	if (this != nullptr)
 	{
+		//if remote bomb is spawned detonate 
 		if (bRemoteBombSpawned)
 		{
 			RemoteBombRef->OnExplode();
 			bRemoteBombSpawned = false;
 			bHoldingDetonator = false;
 		}
+		// if max bomb limit has not be reached spawn bomb
 		else if (SpawnedBombs < MaxBombs)
 		{
+			//make sure player is not overlapping bomb
 			TArray<AActor*> Result;
 			GetOverlappingActors(Result, ABombActor::StaticClass());
 
 			if (Result.Num() == 0)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("BombPlaced")));
+				// find nearest grid point on map to spawn bomb
 				FVector BombLocation = GetNearestGridPoint();
 
+				// if detonator power up is not active spawn normal bomb
 				if (!bHoldingDetonator)
 				{
 					LastBombRef = GetWorld()->SpawnActor<ABombActor>(BombClass, BombLocation, Body->GetComponentRotation());
 					LastBombRef->PlayerRef = this;
 					LastBombRef->SetDefaultParameters(PlayerBombRange);
 				}
+				// if detonator power up is active spawn remote bomb
 				else if (bHoldingDetonator)
 				{
 					RemoteBombRef = GetWorld()->SpawnActor<ABombActor>(RemoteBombClass, BombLocation, Body->GetComponentRotation());
@@ -64,6 +77,7 @@ void APlayerActor::DropBomb()
 					RemoteBombRef->SetDefaultParameters(PlayerBombRange);
 					bRemoteBombSpawned = true;
 				}
+				// add to total spawned bombs
 				SpawnedBombs++;
 			}
 		}
@@ -125,12 +139,6 @@ void APlayerActor::MoveRight(float value)
 	}
 }
 
-// Called when the game starts or when spawned
-void APlayerActor::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 FVector APlayerActor::GetNearestGridPoint()
 {
 	FVector PlayerLocation = Body->GetComponentLocation();
@@ -146,11 +154,13 @@ float APlayerActor::LoopThroughPoints(float PointOnGrid, float ClosestPoint, flo
 {
 	for (int i = 0; i < 10; i++)
 	{
-		
+		// check if player point is less than current grid point
 		if (PointOnGrid < ClosestPoint)
 		{
+			// if true check if it is less than next grid point
 			if (PointOnGrid < (ClosestPoint - Step))
 			{
+				//if true return to start of loop set closest point to next lowest point
 				ClosestPoint -= Step;
 				continue;
 			}
@@ -193,6 +203,7 @@ void APlayerActor::Tick(float DeltaTime)
 
 	if (this != nullptr)
 	{
+		//Apply Impulse to player 
 		if (!PlayerVelociy.IsZero())
 		{
 			FVector PlayerNewLocation = Body->ComponentVelocity + (PlayerVelociy * DeltaTime);
@@ -208,8 +219,10 @@ void APlayerActor::Tick(float DeltaTime)
 
 void APlayerActor::ExplosionResponce()
 {
+	// if player has been caught in an explosion add score to other player
 	UBombermanGameInstance* GameInstanceRef = Cast<UBombermanGameInstance>(GetWorld()->GetGameInstance());
 	GameInstanceRef->PlayerScoreArray[2 - PlayerNumber]++;
+	//set game over to true
 	ABombermanGameModeBase* GameModRef = Cast<ABombermanGameModeBase>(GetWorld()->GetAuthGameMode());
 	GameModRef->bGameOver = true;
 	Destroy();

@@ -24,7 +24,7 @@ void ADestructibleWallActor::BeginPlay()
 
 void ADestructibleWallActor::SpawnPowerUp()
 {
-	
+	//spawn random powerUp
 	int random	= FMath::RandRange(0, 100);
 	if (random <= 30)
 	{

@@ -9,6 +9,9 @@
 class UStaticMeshComponent;
 class APlayerActor;
 
+
+//This class acts as a controller class for both Player 1 and 2
+ 
 UCLASS()
 class BOMBERMAN_API APlayerPawn : public APawn
 {
@@ -22,10 +25,12 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	//Player 1 Inputs
 	void Player1DropBomb();
 	void Player1MoveForward(float value);
 	void Player1MoveRight(float value);
 
+	//Player 2 Inputs
 	void Player2DropBomb();
 	void Player2MoveForward(float value);
 	void Player2MoveRight(float value);
@@ -47,6 +52,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Players")
 	APlayerActor* Player1;
+
 	UPROPERTY(EditAnywhere, Category = "Players")
 	APlayerActor* Player2;
 
