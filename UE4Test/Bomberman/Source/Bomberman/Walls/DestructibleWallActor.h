@@ -9,6 +9,7 @@
 
 class IExplosionInterface;
 class UStaticMeshComponent;
+class ABaseCollectableActor;
 
 UCLASS()
 class BOMBERMAN_API ADestructibleWallActor : public AActor, public IExplosionInterface
@@ -32,6 +33,19 @@ public:
 	virtual void ExplosionResponce() override;
 
 	UPROPERTY(EditDefaultsOnly)
-	UStaticMeshComponent* WallMesh;
+		UStaticMeshComponent* WallMesh;
+
+	UPROPERTY(EditDefaultsOnly, Category = PowerUps)
+		TSubclassOf<class ABaseCollectableActor> SpeedBoost;
+
+	UPROPERTY(EditDefaultsOnly, Category = PowerUps)
+		TSubclassOf<class ABaseCollectableActor> ExtraBomb;
+
+	UPROPERTY(EditDefaultsOnly, Category = PowerUps)
+		TSubclassOf<class ABaseCollectableActor> BombRange;
+
+	UPROPERTY(EditDefaultsOnly, Category = PowerUps)
+		TSubclassOf<class ABaseCollectableActor> RemoteBomb;
+	
 
 };

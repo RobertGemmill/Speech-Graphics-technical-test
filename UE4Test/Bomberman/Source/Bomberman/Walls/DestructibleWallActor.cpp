@@ -4,6 +4,7 @@
 #include "DestructibleWallActor.h"
 #include "Components/StaticMeshComponent.h"
 #include "Bomberman/Interfaces/ExplosionInterface.h"
+#include "Bomberman/Collectable/BaseCollectableActor.h"
 
 // Sets default values
 ADestructibleWallActor::ADestructibleWallActor()
@@ -23,6 +24,29 @@ void ADestructibleWallActor::BeginPlay()
 
 void ADestructibleWallActor::SpawnPowerUp()
 {
+	
+	int random	= FMath::RandRange(0, 100);
+	if (random <= 30)
+	{
+		switch (FMath::RandRange(1, 4))
+		{
+		case 1:
+			GetWorld()->SpawnActor<ABaseCollectableActor>(SpeedBoost, WallMesh->GetComponentLocation(), WallMesh->GetComponentRotation());
+			break;
+		case 2:
+			GetWorld()->SpawnActor<ABaseCollectableActor>(ExtraBomb, WallMesh->GetComponentLocation(), WallMesh->GetComponentRotation());
+			break;
+		case 3:
+			GetWorld()->SpawnActor<ABaseCollectableActor>(BombRange, WallMesh->GetComponentLocation(), WallMesh->GetComponentRotation());
+			break;
+		case 4:
+			GetWorld()->SpawnActor<ABaseCollectableActor>(RemoteBomb, WallMesh->GetComponentLocation(), WallMesh->GetComponentRotation());
+			break;
+		default:
+			break;
+		}
+	}
+	Destroy();
 }
 
 // Called every frame
@@ -35,6 +59,5 @@ void ADestructibleWallActor::Tick(float DeltaTime)
 void ADestructibleWallActor::ExplosionResponce()
 {
 	SpawnPowerUp();
-	Destroy();
 }
 
